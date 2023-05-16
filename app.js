@@ -7,9 +7,11 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 
 const app = express();
-const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
-const reviewRouter = require('./routes/reviewRoutes');
+const serviceRouter = require('./routes/serviceRoutes');
+const moduleRouter = require('./routes/moduleRoutes');
+const appointmentRouter = require('./routes/appointmentRoutes');
+const clientRouter = require('./routes/clientRoutes');
 const globalErrorHandler = require('./controllers/errorController');
 const AppError = require('./utils/appError');
 
@@ -51,9 +53,11 @@ app.use(express.static(`${__dirname}/public`));
 
 // 3. ROUTES
 
-app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
-app.use('/api/v1/reviews', reviewRouter);
+app.use('/api/v1/services', serviceRouter);
+app.use('/api/v1/appointments', appointmentRouter);
+app.use('/api/v1/modules', moduleRouter);
+app.use('/api/v1/clients', clientRouter);
 
 // 404 route
 

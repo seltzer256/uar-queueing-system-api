@@ -46,6 +46,10 @@ const userSchema = new mongoose.Schema({
     default: true,
     select: false,
   },
+  isAvailable: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 userSchema.pre('save', async function (next) {
