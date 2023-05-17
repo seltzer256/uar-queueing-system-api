@@ -10,17 +10,10 @@ const { protect, restrictTo } = require('../controllers/authController');
 
 const router = express.Router();
 
-router.route('/').get(getAllClients);
+router.use(protect, restrictTo('admin'));
 
-router.route('/:id').get(getClient);
+router.route('/').get(getAllClients).post(createClient);
 
-router.use(protect);
-
-router.route('/').post(createClient);
-
-router
-  .route('/:id')
-  .patch(restrictTo('admin'), updateClient)
-  .delete(restrictTo('admin'), deleteClient);
+router.route('/:id').get(getClient).patch(updateClient).delete(deleteClient);
 
 module.exports = router;

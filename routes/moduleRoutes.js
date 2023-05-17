@@ -16,7 +16,7 @@ router.route('/:id').get(getModule);
 
 router.use(protect);
 
-router.route('/').post(createModule);
+router.route('/').post(restrictTo('admin'), createModule);
 
 router
   .route('/:id')

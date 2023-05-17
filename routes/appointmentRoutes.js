@@ -10,14 +10,15 @@ const { protect, restrictTo } = require('../controllers/authController');
 
 const router = express.Router();
 
-router.use(protect);
-
 router.route('/').get(getAllAppointments).post(createAppointment);
+
+router.route('/:id').get(getAppointment);
+
+router.use(protect);
 
 router
   .route('/:id')
-  .get(getAppointment)
-  .patch(restrictTo('admin'), updateAppointment)
-  .delete(restrictTo('admin'), deleteAppointment);
+  .patch(restrictTo('user'), updateAppointment)
+  .delete(restrictTo('user'), deleteAppointment);
 
 module.exports = router;

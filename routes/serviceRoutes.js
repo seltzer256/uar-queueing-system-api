@@ -16,7 +16,7 @@ router.route('/:id').get(getService);
 
 router.use(protect);
 
-router.route('/').post(createService);
+router.route('/').post(restrictTo('admin'), createService);
 
 router
   .route('/:id')
