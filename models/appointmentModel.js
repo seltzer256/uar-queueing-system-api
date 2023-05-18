@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 
 const appointmentSchema = new mongoose.Schema({
-  user: {
+  client: {
     type: mongoose.Schema.ObjectId,
-    ref: 'User',
+    ref: 'Client',
     // required: true,
   },
   module: {
