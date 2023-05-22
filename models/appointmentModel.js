@@ -11,6 +11,7 @@ const appointmentSchema = new mongoose.Schema({
     ref: 'Module',
     required: true,
   },
+  code: String,
   date: {
     type: Date,
     required: true,

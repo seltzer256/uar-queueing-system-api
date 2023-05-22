@@ -18,6 +18,17 @@ const moduleSchema = new mongoose.Schema({
   //   options: [String],
 });
 
+moduleSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'user',
+    select: 'name isAvailable',
+  }).populate({
+    path: 'service',
+    select: 'name description active',
+  });
+  next();
+});
+
 const Module = mongoose.model('Module', moduleSchema);
 
 module.exports = Module;

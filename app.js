@@ -5,7 +5,7 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
-
+const cors = require('cors');
 const app = express();
 const userRouter = require('./routes/userRoutes');
 const serviceRouter = require('./routes/serviceRoutes');
@@ -18,6 +18,8 @@ const AppError = require('./utils/appError');
 // 1. MIDDLEWARES
 
 app.use(helmet());
+
+app.use(cors());
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
