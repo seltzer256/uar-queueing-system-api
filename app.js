@@ -10,7 +10,7 @@ const app = express();
 const userRouter = require('./routes/userRoutes');
 const serviceRouter = require('./routes/serviceRoutes');
 const moduleRouter = require('./routes/moduleRoutes');
-const appointmentRouter = require('./routes/appointmentRoutes');
+const shiftRoutes = require('./routes/shiftRoutes');
 const clientRouter = require('./routes/clientRoutes');
 const globalErrorHandler = require('./controllers/errorController');
 const AppError = require('./utils/appError');
@@ -57,7 +57,7 @@ app.use(express.static(`${__dirname}/public`));
 
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/services', serviceRouter);
-app.use('/api/v1/appointments', appointmentRouter);
+app.use('/api/v1/shifts', shiftRoutes);
 app.use('/api/v1/modules', moduleRouter);
 app.use('/api/v1/clients', clientRouter);
 

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const appointmentSchema = new mongoose.Schema({
+const shiftSchema = new mongoose.Schema({
   client: {
     type: mongoose.Schema.ObjectId,
     ref: 'Client',
@@ -38,6 +38,6 @@ const appointmentSchema = new mongoose.Schema({
   observation: String,
 });
 
-const Appointment = mongoose.model('Appointment', appointmentSchema);
+const Shift = mongoose.model('Shift', shiftSchema);
 
-module.exports = Appointment;
+module.exports = Shift;
