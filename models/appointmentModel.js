@@ -7,9 +7,15 @@ const appointmentSchema = new mongoose.Schema({
     // required: true,
   },
   module: {
-    type: mongoose.Schema.ObjectId,
-    ref: 'Module',
-    required: true,
+    _id: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Module',
+      required: true,
+    },
+    user: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User',
+    },
   },
   code: String,
   date: {
@@ -27,7 +33,7 @@ const appointmentSchema = new mongoose.Schema({
   state: {
     type: String,
     required: true,
-    enum: ['pending', 'approved', 'rejected'],
+    enum: ['in-progress', 'on-hold', 'completed', 'cancelled', 'pending'],
   },
   observation: String,
 });

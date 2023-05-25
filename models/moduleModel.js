@@ -15,6 +15,14 @@ const moduleSchema = new mongoose.Schema({
   },
   code: String,
   name: String,
+  authRequired: {
+    type: Boolean,
+    default: false,
+  },
+  active: {
+    type: Boolean,
+    default: true,
+  },
   //   options: [String],
 });
 
@@ -26,6 +34,7 @@ moduleSchema.pre(/^find/, function (next) {
     path: 'service',
     select: 'name description active',
   });
+  // .find({ active: true });
   next();
 });
 

@@ -26,7 +26,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 const limiter = rateLimiter({
-  max: 100,
+  max: 1000,
   windowMs: 60 * 60 * 1000,
   message: 'Too many requests from this IP. please try again in an hour.',
 });
@@ -50,7 +50,7 @@ app.use(
 
 app.use(xss());
 
-app.use(express.json({ limit: '10kb' }));
+app.use(express.json({ limit: '10mb' }));
 app.use(express.static(`${__dirname}/public`));
 
 // 3. ROUTES

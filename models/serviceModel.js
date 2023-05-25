@@ -16,10 +16,6 @@ const serviceSchema = new mongoose.Schema({
     minLength: [10, 'Description must be at least 10 characters long'],
     maxLength: [1000, 'Description must be at most 1000 characters long'],
   },
-  active: {
-    type: Boolean,
-    default: true,
-  },
 });
 
 serviceSchema.pre('save', function (next) {

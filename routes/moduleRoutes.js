@@ -5,22 +5,20 @@ const {
   updateModule,
   createModule,
   getModule,
+  getActiveModules,
 } = require('../controllers/moduleController');
 const { protect, restrictTo } = require('../controllers/authController');
 
 const router = express.Router();
 
-router.route('/').get(getAllModules);
+router.route('/active').get(getActiveModules);
 
 router.route('/:id').get(getModule);
 
 router.use(protect);
 
-router.route('/').post(restrictTo('admin'), createModule);
+router.route('/').post(createModule).get(getAllModules);
 
-router
-  .route('/:id')
-  .patch(restrictTo('admin'), updateModule)
-  .delete(restrictTo('admin'), deleteModule);
+router.route('/:id').patch(updateModule).delete(deleteModule);
 
 module.exports = router;
