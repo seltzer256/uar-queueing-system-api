@@ -14,11 +14,11 @@ const router = express.Router();
 
 router.route('/').get(getAllShifts).post(createShift);
 
-router.route('/:id').get(getShift);
+// router.route('/:id').get(getShift);
 
 router.use(protect);
 
-router.route('/by-user/:user').get(getShiftsByUser);
+router.route('/by-user').get(getShiftsByUser);
 
 router.route('/change-state').post(changeState);
 

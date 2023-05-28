@@ -86,7 +86,8 @@ exports.createShift = catchAsync(async (req, res, next) => {
 });
 
 exports.getShiftsByUser = catchAsync(async (req, res, next) => {
-  const user = req.params.user;
+  const user = req.user.id;
+  // console.log('user :>> ', user);
 
   const shifts = await Shift.find({
     'module.user': user,
