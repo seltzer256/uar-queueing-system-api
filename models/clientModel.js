@@ -3,11 +3,11 @@ const mongoose = require('mongoose');
 const clientSchema = new mongoose.Schema({
   email: {
     type: String,
-    unique: true,
   },
   documentId: {
     type: String,
     required: true,
+    unique: true,
   },
   firstName: String,
   lastName: String,

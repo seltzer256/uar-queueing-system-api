@@ -15,25 +15,23 @@ const shiftSchema = new mongoose.Schema({
     user: {
       type: mongoose.Schema.ObjectId,
       ref: 'User',
+      required: true,
     },
   },
-  code: String,
+  code: {
+    type: String,
+    required: true,
+  },
   date: {
     type: Date,
     required: true,
   },
-  startDate: {
-    type: Date,
-    required: true,
-  },
-  endDate: {
-    type: Date,
-    required: true,
-  },
+  startDate: Date,
+  endDate: Date,
   state: {
     type: String,
-    required: true,
     enum: ['in-progress', 'on-hold', 'completed', 'cancelled', 'pending'],
+    default: 'on-hold',
   },
   observation: String,
 });

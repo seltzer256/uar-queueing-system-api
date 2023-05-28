@@ -5,6 +5,8 @@ const {
   updateShift,
   createShift,
   getShift,
+  getShiftsByUser,
+  changeState,
 } = require('../controllers/shiftController');
 const { protect, restrictTo } = require('../controllers/authController');
 
@@ -15,6 +17,10 @@ router.route('/').get(getAllShifts).post(createShift);
 router.route('/:id').get(getShift);
 
 router.use(protect);
+
+router.route('/by-user/:user').get(getShiftsByUser);
+
+router.route('/change-state').post(changeState);
 
 router
   .route('/:id')
