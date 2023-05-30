@@ -33,7 +33,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 
   // const { name, email } = req.body;
 
-  const filteredObj = filterObj(req.body, ['name', 'email']);
+  const filteredObj = filterObj(req.body, ['name', 'email', 'isAvailable']);
 
   // console.log('filteredObj :>> ', filteredObj);
 
