@@ -4,7 +4,6 @@ const {
   deleteShift,
   updateShift,
   createShift,
-  getShift,
   getShiftsByUser,
   changeState,
 } = require('../controllers/shiftController');
