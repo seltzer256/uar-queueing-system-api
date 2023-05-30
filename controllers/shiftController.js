@@ -91,7 +91,12 @@ exports.getShiftsByUser = catchAsync(async (req, res, next) => {
 
   const shifts = await Shift.find({
     'module.user': user,
-  }).select('-module');
+  })
+    .populate({
+      path: 'module._id',
+      select: 'name active -service -user',
+    })
+    .select('-module.user');
 
   res.status(200).json({
     status: 'success',
