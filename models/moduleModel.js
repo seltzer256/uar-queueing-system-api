@@ -12,6 +12,7 @@ const moduleSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     ref: 'Service',
     required: true,
+    unique: true,
   },
   code: String,
   name: String,
