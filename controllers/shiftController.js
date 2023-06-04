@@ -87,11 +87,20 @@ exports.createShift = catchAsync(async (req, res, next) => {
 
 exports.getShiftsByUser = catchAsync(async (req, res, next) => {
   const user = req.user.id;
+  const onlyToday = req.query.onlyToday;
   // console.log('user :>> ', user);
-
-  const shifts = await Shift.find({
+  // console.log('onlyToday :>> ', onlyToday);
+  const query = {
     'module.user': user,
-  })
+  };
+
+  if (onlyToday) {
+    query.date = {
+      $gte: dayjs().startOf('day').utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
+    };
+  }
+
+  const shifts = await Shift.find(query)
     .populate({
       path: 'module._id',
       select: 'name active -service -user',
