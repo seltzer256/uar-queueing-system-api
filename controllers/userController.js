@@ -2,6 +2,11 @@ const catchAsync = require('../utils/catchAsync');
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const factory = require('./handlerFactory');
+let io;
+
+exports.setUserControllerIO = (socketIO) => {
+  io = socketIO;
+};
 
 exports.getAllUsers = factory.getAll(User);
 
@@ -41,6 +46,13 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     new: true,
     runValidators: true,
   });
+
+  io.emit('changeAvailability', user.isAvailable);
+
+  // if (filteredObj.isAvailable == user.isAvailable) {
+  //   console.log('user :>> ', user);
+  //   io.emit('changeAvailability', user.isAvailable);
+  // }
 
   res.status(200).json({
     status: 'success',

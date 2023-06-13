@@ -6,12 +6,15 @@ const {
   createShift,
   getShiftsByUser,
   changeState,
+  getTodayShifts,
 } = require('../controllers/shiftController');
 const { protect, restrictTo } = require('../controllers/authController');
 
 const router = express.Router();
 
 router.route('/').get(getAllShifts).post(createShift);
+
+router.route('/today').get(getTodayShifts);
 
 // router.route('/:id').get(getShift);
 

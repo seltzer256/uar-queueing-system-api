@@ -6,6 +6,26 @@ const factory = require('./handlerFactory');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
+let io;
+
+exports.setShiftControllerIO = (socketIO) => {
+  io = socketIO;
+};
+
+exports.getTodayShifts = catchAsync(async (req, res, next) => {
+  const todayShifts = await Shift.find({
+    state: { $in: ['in-progress', 'on-hold'] },
+    date: {
+      $gte: dayjs().startOf('day').utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
+    },
+  }).sort({ state: 1, date: 1 });
+
+  res.status(200).json({
+    status: 'success',
+    results: todayShifts.length,
+    data: todayShifts,
+  });
+});
 
 exports.getAllShifts = factory.getAll(Shift);
 
@@ -78,10 +98,12 @@ exports.createShift = catchAsync(async (req, res, next) => {
     code,
   });
 
+  io.emit('shiftCreated', moduleUser);
+
   res.status(200).json({
     status: 'success',
     shift,
-    todayShifts,
+    // todayShifts,
   });
 });
 
@@ -154,6 +176,8 @@ exports.changeState = catchAsync(async (req, res, next) => {
   const shift = await Shift.findByIdAndUpdate(id, newData, {
     new: true,
   });
+
+  io.emit('shiftUpdated', shift);
 
   res.status(200).json({
     status: 'success',

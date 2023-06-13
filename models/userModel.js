@@ -52,6 +52,12 @@ const userSchema = new mongoose.Schema({
   },
 });
 
+// userSchema.post('findOneAndUpdate', async function (doc, next) {
+//   console.log('doc :>> ', doc);
+
+//   next();
+// });
+
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
 
