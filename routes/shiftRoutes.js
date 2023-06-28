@@ -7,6 +7,8 @@ const {
   getShiftsByUser,
   changeState,
   getTodayShifts,
+  getTodayShiftsByUsers,
+  attendingAverage,
 } = require('../controllers/shiftController');
 const { protect, restrictTo } = require('../controllers/authController');
 
@@ -15,6 +17,10 @@ const router = express.Router();
 router.route('/').get(getAllShifts).post(createShift);
 
 router.route('/today').get(getTodayShifts);
+
+router.route('/today-by-user').get(getTodayShiftsByUsers);
+
+router.route('/attending-average-by-user').get(attendingAverage);
 
 // router.route('/:id').get(getShift);
 
