@@ -24,6 +24,10 @@ const moduleSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  enableChoose: {
+    type: Boolean,
+    default: false,
+  },
   //   options: [String],
 });
 
