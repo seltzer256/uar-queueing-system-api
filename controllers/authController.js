@@ -5,6 +5,7 @@ const AppError = require('../utils/appError');
 const { promisify } = require('util');
 const sendEmail = require('../utils/email');
 const crypto = require('crypto');
+const { PASS_RECOVERY_EMAIL } = require('../utils/emails/pass-recovery');
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SK, {
@@ -130,18 +131,16 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 
   await user.save({ validateBeforeSave: false });
 
-  const resetURL = `${req.protocol}://${req.get(
-    'host'
-  )}/api/v1/users/resetPassword/${resetToken}`;
+  // const resetURL = `${req.protocol}://${req.get(
+  //   'host'
+  // )}/api/v1/users/resetPassword/${resetToken}`;
 
-  const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to ${resetURL}.
-  \nIf you didn't forget your password, please ignore this email!.
-  `;
+  const message = PASS_RECOVERY_EMAIL(user.name, resetToken);
 
   try {
     await sendEmail({
       email: user.email,
-      subject: 'Your password reset Token(only valid for 10min)',
+      subject: 'Restablecer contraseña(Válido por 10 minutos)',
       message,
     });
 
@@ -150,6 +149,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
       message: 'The email was sent successfully!',
     });
   } catch (err) {
+    // console.log('err :>> ', err);
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
 

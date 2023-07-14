@@ -16,11 +16,12 @@ const sendEmail = async (options) => {
   });
 
   const mailOptions = {
-    from: 'Henry Fuerez <henry@aftershock.agency>',
+    from: 'Unidad de Admisión y Registro <uar@espe.edu.ec>',
     to: options.email,
-    bcc: ['henry@aftershock.agency'],
+    // bcc: ['uar@espe.edu.ec'],
     subject: options.subject,
-    text: options.message,
+    // text: options.message,
+    html: options.message,
   };
 
   await transporter.sendMail(mailOptions);
