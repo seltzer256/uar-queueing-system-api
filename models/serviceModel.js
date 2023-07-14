@@ -8,11 +8,15 @@ const serviceSchema = new mongoose.Schema({
   },
   name: {
     type: String,
-    required: [true, 'Plan must have a name!'],
+    required: [true, 'Service must have a name!'],
+  },
+  code: {
+    type: String,
+    required: [true, 'Service must have a code!'],
   },
   description: {
     type: String,
-    required: [true, 'Plan must have a description'],
+    required: [true, 'Service must have a description'],
     minLength: [10, 'Description must be at least 10 characters long'],
     maxLength: [1000, 'Description must be at most 1000 characters long'],
   },
