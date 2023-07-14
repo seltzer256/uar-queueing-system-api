@@ -5,12 +5,15 @@ const {
   updateService,
   createService,
   getService,
+  getActiveServices,
 } = require('../controllers/serviceController');
 const { protect, restrictTo } = require('../controllers/authController');
 
 const router = express.Router();
 
 router.route('/').get(getAllServices);
+
+router.route('/active').get(getActiveServices);
 
 router.route('/:id').get(getService);
 

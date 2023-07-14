@@ -1,34 +1,24 @@
 const mongoose = require('mongoose');
 
 const moduleSchema = new mongoose.Schema({
-  user: [
+  user: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  services: [
     {
       type: mongoose.Schema.ObjectId,
-      ref: 'User',
+      ref: 'Service',
       required: true,
     },
   ],
-  service: {
-    type: mongoose.Schema.ObjectId,
-    ref: 'Service',
-    required: true,
-    unique: true,
-  },
   code: String,
   name: String,
-  authRequired: {
-    type: Boolean,
-    default: false,
-  },
   active: {
     type: Boolean,
     default: true,
   },
-  enableChoose: {
-    type: Boolean,
-    default: false,
-  },
-  //   options: [String],
 });
 
 moduleSchema.pre(/^find/, function (next) {

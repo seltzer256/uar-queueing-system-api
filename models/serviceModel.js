@@ -14,6 +14,18 @@ const serviceSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Service must have a code!'],
   },
+  active: {
+    type: Boolean,
+    default: true,
+  },
+  chooseRequired: {
+    type: Boolean,
+    default: false,
+  },
+  authRequired: {
+    type: Boolean,
+    default: false,
+  },
   description: {
     type: String,
     required: [true, 'Service must have a description'],
