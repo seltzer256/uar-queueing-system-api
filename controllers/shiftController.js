@@ -212,25 +212,37 @@ exports.getShift = factory.getOne(Shift);
 exports.createShift = catchAsync(async (req, res, next) => {
   const { clientName, clientEmail, serviceId, userId } = req.body;
 
-  const module = await Module.findOne({
-    user: mongoose.Types.ObjectId(userId),
-  }).populate({
-    path: 'user',
-    select: 'name',
-  });
-
   const service = await Service.findById(serviceId);
 
   const authRequired = service.authRequired;
 
   const chooseRequired = service.chooseRequired;
 
+  // console.log('chooseRequired :>> ', chooseRequired);
+
+  const module = chooseRequired
+    ? await Module.findOne({
+        user: mongoose.Types.ObjectId(userId),
+      }).populate({
+        path: 'user',
+        select: 'name isAvailable',
+      })
+    : null;
+
   // console.log('module :>> ', module);
 
   // console.log('service :>> ', service);
 
+  if (chooseRequired && !module) {
+    return res.status(401).json({
+      status: 'error',
+      message: 'Unauthorized',
+    });
+  }
+
   if (
-    !module ||
+    !chooseRequired &&
+    module &&
     !!!module?.services.find((s) => s._id.toString() === serviceId)
   ) {
     return res.status(401).json({
