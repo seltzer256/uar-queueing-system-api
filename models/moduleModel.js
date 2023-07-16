@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 
 const moduleSchema = new mongoose.Schema({
+  code: String,
+  name: String,
   user: {
     type: mongoose.Schema.ObjectId,
     ref: 'User',
@@ -13,8 +15,6 @@ const moduleSchema = new mongoose.Schema({
       required: true,
     },
   ],
-  code: String,
-  name: String,
   active: {
     type: Boolean,
     default: true,
@@ -24,10 +24,10 @@ const moduleSchema = new mongoose.Schema({
 moduleSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'user',
-    select: 'name isAvailable',
+    select: 'name active',
   }).populate({
-    path: 'service',
-    select: 'name description active',
+    path: 'services',
+    select: 'name active',
   });
   // .find({ active: true });
   next();
