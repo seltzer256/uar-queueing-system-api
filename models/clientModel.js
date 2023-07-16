@@ -6,8 +6,7 @@ const clientSchema = new mongoose.Schema({
     unique: true,
     required: true,
   },
-  firstName: String,
-  lastName: String,
+  name: String,
 });
 
 const Client = mongoose.model('Client', clientSchema);

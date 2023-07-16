@@ -7,16 +7,14 @@ const shiftSchema = new mongoose.Schema({
     // required: true,
   },
   module: {
-    _id: {
-      type: mongoose.Schema.ObjectId,
-      ref: 'Module',
-      required: true,
-    },
-    user: {
-      type: mongoose.Schema.ObjectId,
-      ref: 'User',
-      required: true,
-    },
+    type: mongoose.Schema.ObjectId,
+    ref: 'Module',
+    // required: true,
+  },
+  service: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'Service',
+    required: true,
   },
   code: {
     type: String,
@@ -38,8 +36,8 @@ const shiftSchema = new mongoose.Schema({
 
 shiftSchema.pre(/^find/, function (next) {
   this.populate({
-    path: 'module._id',
-    select: 'name -service -user',
+    path: 'module',
+    select: 'name -services -user',
   }).select('-module.user');
   // .find({ active: true });
   next();

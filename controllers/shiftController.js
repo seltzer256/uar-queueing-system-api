@@ -1,6 +1,7 @@
 const Client = require('../models/clientModel');
 const Module = require('../models/moduleModel');
 const Shift = require('../models/shiftModel');
+const Service = require('../models/serviceModel');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
 const dayjs = require('dayjs');
@@ -209,73 +210,99 @@ exports.getAllShifts = factory.getAll(Shift);
 exports.getShift = factory.getOne(Shift);
 
 exports.createShift = catchAsync(async (req, res, next) => {
-  const { moduleId, clientId, moduleUser } = req.body;
+  const { clientName, clientEmail, serviceId, userId } = req.body;
 
-  const module = await Module.findById(moduleId);
+  const module = await Module.findOne({
+    user: mongoose.Types.ObjectId(userId),
+  }).populate({
+    path: 'user',
+    select: 'name',
+  });
 
-  const authRequired = module.authRequired;
+  const service = await Service.findById(serviceId);
+
+  const authRequired = service.authRequired;
+
+  const chooseRequired = service.chooseRequired;
+
+  // console.log('module :>> ', module);
+
+  // console.log('service :>> ', service);
+
+  if (
+    !module ||
+    !!!module?.services.find((s) => s._id.toString() === serviceId)
+  ) {
+    return res.status(401).json({
+      status: 'error',
+      message: 'Unauthorized',
+    });
+  }
 
   let client = null;
 
-  if (authRequired && clientId) {
-    client = await Client.findOne({
-      documentId: clientId,
-    });
+  if (authRequired && clientEmail) {
+    client = await Client.findOneAndUpdate(
+      {
+        email: clientEmail,
+      },
+      {
+        $set: {
+          email: clientEmail,
+          name: clientName,
+        },
+      }
+    );
     if (!client) {
       //
       //TODO: get client data from ESPE Api
       //
       client = await Client.create({
-        documentId: clientId,
+        email: clientEmail,
+        name: clientName,
       });
     }
   }
 
-  if (authRequired && !clientId) {
+  if (authRequired && !clientEmail) {
     return res.status(401).json({
       status: 'error',
-      message: 'Client document Id is required',
+      message: 'Client data is required',
     });
   }
 
-  const isCorrectUser = module.user.find(
-    (user) => user._id.toString() === moduleUser
-  );
-
-  if (!isCorrectUser) {
-    return res.status(401).json({
-      status: 'error',
-      message: 'Module user not found',
-    });
-  }
-
-  const startOfDay = dayjs()
-    .startOf('day')
-    .utc()
-    .format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+  const startOfDay = dayjs().startOf('day');
 
   // console.log('startOfDay :>> ', startOfDay);
 
   const todayShifts = await Shift.find({
-    'module._id': module._id,
+    service: service._id,
     date: {
       $gte: startOfDay,
     },
   });
 
-  const code = `${module.code}-${todayShifts.length + 1}`;
+  // console.log('todayShifts :>> ', todayShifts);
 
-  const shift = await Shift.create({
+  const code = `${service.code}-${todayShifts.length + 1}`;
+
+  let createQuery = {
     client: client?._id,
-    module: {
-      _id: module._id,
-      user: moduleUser,
-    },
+    service: service._id,
     date: new Date(),
     code,
-  });
+  };
 
-  io.emit('shiftCreated', moduleUser);
+  if (chooseRequired) {
+    createQuery = {
+      ...createQuery,
+      module: module._id,
+    };
+  }
+
+  const shift = await Shift.create(createQuery);
+
+  io.emit('shiftCreated', userId);
 
   res.status(200).json({
     status: 'success',
@@ -287,27 +314,57 @@ exports.createShift = catchAsync(async (req, res, next) => {
 exports.getShiftsByUser = catchAsync(async (req, res, next) => {
   const user = req.user.id;
   const onlyToday = req.query.onlyToday;
-  // console.log('user :>> ', user);
+  console.log('user :>> ', user);
   // console.log('onlyToday :>> ', onlyToday);
   const query = {
-    'module.user': user,
+    'currentModule.user': { $in: [new mongoose.Types.ObjectId(user)] },
   };
 
   if (onlyToday) {
+    const today = dayjs().format('YYYY-MM-DD');
     query.date = {
-      $gte: dayjs().startOf('day').utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
+      $gte: new Date(today),
     };
   }
 
-  const shifts = await Shift.find(query)
-    .populate({
-      path: 'module._id',
-      select: 'name active -service -user',
-    })
-    .select('-module.user');
+  const shifts = await Shift.aggregate([
+    {
+      $lookup: {
+        from: 'modules',
+        localField: 'module._id',
+        foreignField: '_id',
+        as: 'currentModule',
+      },
+    },
+    {
+      $unwind: '$currentModule',
+    },
+    {
+      $match: query,
+    },
+    {
+      $lookup: {
+        from: 'services',
+        localField: 'currentModule.service',
+        foreignField: '_id',
+        as: 'service',
+      },
+    },
+    {
+      $unwind: '$service',
+    },
+  ]);
+
+  // const shifts = await Shift.find(query)
+  //   .populate({
+  //     path: 'module._id',
+  //     select: 'name active -service -user',
+  //   })
+  //   .select('-module.user');
 
   res.status(200).json({
     status: 'success',
+    results: shifts.length,
     shifts,
   });
 });
