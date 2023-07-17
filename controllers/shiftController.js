@@ -34,31 +34,41 @@ exports.getTodayShifts = catchAsync(async (req, res, next) => {
 exports.getTodayShiftsByUsers = catchAsync(async (req, res, next) => {
   const { date, module } = req.query;
 
-  if (!date || !dayjs(date).isValid()) {
-    return res.status(400).json({
-      status: 'error',
-      message: 'Date is required',
-    });
-  }
-
   let matchQuery = {
     state: { $in: ['completed', 'cancelled'] },
-    date: {
-      $gte: new Date(date),
-      $lte: new Date(date + ' 23:59:59'),
-    },
   };
+
+  if (dayjs(date).isValid()) {
+    matchQuery = {
+      ...matchQuery,
+      date: {
+        $gte: new Date(date),
+        $lte: new Date(date + ' 23:59:59'),
+      },
+    };
+  }
 
   if (module) {
     matchQuery = {
       ...matchQuery,
-      'module._id': new mongoose.Types.ObjectId(module),
+      module: new mongoose.Types.ObjectId(module),
     };
   }
 
   const todayShifts = await Shift.aggregate([
     {
       $match: matchQuery,
+    },
+    {
+      $lookup: {
+        from: 'modules',
+        localField: 'module',
+        foreignField: '_id',
+        as: 'module',
+      },
+    },
+    {
+      $unwind: '$module',
     },
     {
       $project: {
@@ -130,31 +140,41 @@ exports.getTodayShiftsByUsers = catchAsync(async (req, res, next) => {
 exports.attendingAverage = catchAsync(async (req, res, next) => {
   const { date, module } = req.query;
 
-  if (!date || !dayjs(date).isValid()) {
-    return res.status(400).json({
-      status: 'error',
-      message: 'Date is required',
-    });
-  }
-
   let matchQuery = {
     state: { $in: ['completed', 'cancelled'] },
-    date: {
-      $gte: new Date(date),
-      $lte: new Date(date + ' 23:59:59'),
-    },
   };
+
+  if (dayjs(date).isValid()) {
+    matchQuery = {
+      ...matchQuery,
+      date: {
+        $gte: new Date(date),
+        $lte: new Date(date + ' 23:59:59'),
+      },
+    };
+  }
 
   if (module) {
     matchQuery = {
       ...matchQuery,
-      'module._id': new mongoose.Types.ObjectId(module),
+      module: new mongoose.Types.ObjectId(module),
     };
   }
 
   const average = await Shift.aggregate([
     {
       $match: matchQuery,
+    },
+    {
+      $lookup: {
+        from: 'modules',
+        localField: 'module',
+        foreignField: '_id',
+        as: 'module',
+      },
+    },
+    {
+      $unwind: '$module',
     },
     {
       $lookup: {
@@ -336,6 +356,23 @@ exports.createShift = catchAsync(async (req, res, next) => {
     }
   }
 
+  const waitTimeAvg = Shift.aggregate([
+    {
+      $project: {
+        service: 1,
+        waitTime: {
+          $subtract: ['$endDate', '$startDate'],
+        },
+      },
+    },
+    {
+      $group: {
+        _id: '$service',
+        averageWaitTime: { $avg: '$waitTime' },
+      },
+    },
+  ]);
+
   io.emit('shiftCreated', userId);
 
   res.status(200).json({
@@ -344,6 +381,7 @@ exports.createShift = catchAsync(async (req, res, next) => {
       ...shift._doc,
       service,
       waiting: waitingShifts.length,
+      averageWaitTime: waitTimeAvg[0].averageWaitTime,
     },
     // todayShifts,
   });
