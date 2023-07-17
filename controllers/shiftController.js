@@ -314,11 +314,16 @@ exports.createShift = catchAsync(async (req, res, next) => {
 
   const shift = await Shift.create(createQuery);
 
+  const waitingShifts = todayShifts.filter((s) => s.state === 'on-hold');
+
   io.emit('shiftCreated', userId);
 
   res.status(200).json({
     status: 'success',
-    shift,
+    shift: {
+      ...shift._doc,
+      waiting: waitingShifts.length,
+    },
     // todayShifts,
   });
 });
