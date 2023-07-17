@@ -6,8 +6,9 @@ const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
-const { mongooseDateFormat } = require('../utils/utils');
 const { default: mongoose } = require('mongoose');
+const sendEmail = require('../utils/email');
+const { SHIFT_EMAIL } = require('../utils/emails/shift-email');
 dayjs.extend(utc);
 let io;
 
@@ -316,12 +317,32 @@ exports.createShift = catchAsync(async (req, res, next) => {
 
   const waitingShifts = todayShifts.filter((s) => s.state === 'on-hold');
 
+  if (clientEmail) {
+    const message = SHIFT_EMAIL(
+      clientName,
+      shift,
+      waitingShifts.length,
+      service
+    );
+
+    try {
+      await sendEmail({
+        email: clientEmail,
+        subject: `Su ticket ha sido creado`,
+        message,
+      });
+    } catch (err) {
+      console.log('err :>> ', err);
+    }
+  }
+
   io.emit('shiftCreated', userId);
 
   res.status(200).json({
     status: 'success',
     shift: {
       ...shift._doc,
+      service,
       waiting: waitingShifts.length,
     },
     // todayShifts,
