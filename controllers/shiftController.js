@@ -319,6 +319,8 @@ exports.createShift = catchAsync(async (req, res, next) => {
 
   const code = `${service.code}-${todayShifts.length + 1}`;
 
+  // console.log('client :>> ', client);
+
   let createQuery = {
     client: client?._id,
     service: service._id,
@@ -409,10 +411,15 @@ exports.getShiftsByUser = catchAsync(async (req, res, next) => {
       $gte: new Date(today),
     },
     $or: [{ module: module._id }, { service: { $in: module.services } }],
-  }).populate({
-    path: 'module',
-    select: 'name code',
-  });
+  })
+    .populate({
+      path: 'module',
+      select: 'name code',
+    })
+    .populate({
+      path: 'client',
+      select: 'name',
+    });
 
   res.status(200).json({
     status: 'success',
