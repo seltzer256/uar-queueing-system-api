@@ -409,6 +409,9 @@ exports.getShiftsByUser = catchAsync(async (req, res, next) => {
       $gte: new Date(today),
     },
     $or: [{ module: module._id }, { service: { $in: module.services } }],
+  }).populate({
+    path: 'module',
+    select: 'name code',
   });
 
   res.status(200).json({
@@ -420,6 +423,7 @@ exports.getShiftsByUser = catchAsync(async (req, res, next) => {
 
 exports.changeState = catchAsync(async (req, res, next) => {
   const { id, state, observation } = req.body;
+  const user = req.user.id;
 
   if (!state || !id)
     return res.status(400).json({
@@ -431,8 +435,15 @@ exports.changeState = catchAsync(async (req, res, next) => {
 
   switch (state) {
     case 'in-progress':
+      const module = await Module.findOne({
+        user: new mongoose.Types.ObjectId(user),
+      });
+
+      // console.log('module :>> ', module);
+
       newData = {
         state: 'in-progress',
+        module: module._id,
         startDate: new Date(),
       };
       break;
