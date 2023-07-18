@@ -356,7 +356,7 @@ exports.createShift = catchAsync(async (req, res, next) => {
     }
   }
 
-  const waitTimeAvg = Shift.aggregate([
+  const waitTimeAvg = await Shift.aggregate([
     {
       $project: {
         service: 1,
@@ -371,7 +371,14 @@ exports.createShift = catchAsync(async (req, res, next) => {
         averageWaitTime: { $avg: '$waitTime' },
       },
     },
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(serviceId),
+      },
+    },
   ]);
+
+  // console.log('waitTimeAvg :>> ', waitTimeAvg);
 
   io.emit('shiftCreated', userId);
 
@@ -389,54 +396,20 @@ exports.createShift = catchAsync(async (req, res, next) => {
 
 exports.getShiftsByUser = catchAsync(async (req, res, next) => {
   const user = req.user.id;
-  const onlyToday = req.query.onlyToday;
-  console.log('user :>> ', user);
-  // console.log('onlyToday :>> ', onlyToday);
-  const query = {
-    'currentModule.user': { $in: [new mongoose.Types.ObjectId(user)] },
-  };
 
-  if (onlyToday) {
-    const today = dayjs().format('YYYY-MM-DD');
-    query.date = {
+  const module = await Module.findOne({
+    user: new mongoose.Types.ObjectId(user),
+  });
+
+  // console.log('module :>> ', module);
+  const today = dayjs().utc().format('YYYY-MM-DD');
+
+  const shifts = await Shift.find({
+    date: {
       $gte: new Date(today),
-    };
-  }
-
-  const shifts = await Shift.aggregate([
-    {
-      $lookup: {
-        from: 'modules',
-        localField: 'module._id',
-        foreignField: '_id',
-        as: 'currentModule',
-      },
     },
-    {
-      $unwind: '$currentModule',
-    },
-    {
-      $match: query,
-    },
-    {
-      $lookup: {
-        from: 'services',
-        localField: 'currentModule.service',
-        foreignField: '_id',
-        as: 'service',
-      },
-    },
-    {
-      $unwind: '$service',
-    },
-  ]);
-
-  // const shifts = await Shift.find(query)
-  //   .populate({
-  //     path: 'module._id',
-  //     select: 'name active -service -user',
-  //   })
-  //   .select('-module.user');
+    $or: [{ module: module._id }, { service: { $in: module.services } }],
+  });
 
   res.status(200).json({
     status: 'success',

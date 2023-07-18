@@ -26,7 +26,7 @@ router.route('/attending-average-by-user').get(attendingAverage);
 
 router.use(protect);
 
-router.route('/by-user').get(getShiftsByUser);
+router.route('/mine').get(getShiftsByUser);
 
 router.route('/change-state').post(changeState);
 
