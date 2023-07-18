@@ -18,7 +18,7 @@ exports.setShiftControllerIO = (socketIO) => {
 
 exports.getTodayShifts = catchAsync(async (req, res, next) => {
   const todayShifts = await Shift.find({
-    state: { $in: ['in-progress', 'on-hold'] },
+    state: { $in: ['in-progress'] },
     date: {
       $gte: dayjs().startOf('day').utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
     },

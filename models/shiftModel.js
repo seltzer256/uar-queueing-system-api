@@ -37,7 +37,7 @@ const shiftSchema = new mongoose.Schema({
 shiftSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'module',
-    select: 'name -services -user',
+    select: 'name code -services -user',
   }).select('-module.user');
   // .find({ active: true });
   next();
