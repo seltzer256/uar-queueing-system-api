@@ -32,7 +32,7 @@ exports.getTodayShifts = catchAsync(async (req, res, next) => {
 });
 
 exports.getTodayShiftsByUsers = catchAsync(async (req, res, next) => {
-  const { date, module } = req.query;
+  const { date, service } = req.query;
 
   let matchQuery = {
     state: { $in: ['completed', 'cancelled'] },
@@ -48,12 +48,14 @@ exports.getTodayShiftsByUsers = catchAsync(async (req, res, next) => {
     };
   }
 
-  if (module) {
+  if (service) {
     matchQuery = {
       ...matchQuery,
-      module: new mongoose.Types.ObjectId(module),
+      service: new mongoose.Types.ObjectId(service),
     };
   }
+
+  // const serviceObj = await Service.findById(service);
 
   const todayShifts = await Shift.aggregate([
     {
@@ -138,7 +140,7 @@ exports.getTodayShiftsByUsers = catchAsync(async (req, res, next) => {
 });
 
 exports.attendingAverage = catchAsync(async (req, res, next) => {
-  const { date, module } = req.query;
+  const { date, service } = req.query;
 
   let matchQuery = {
     state: { $in: ['completed', 'cancelled'] },
@@ -154,10 +156,10 @@ exports.attendingAverage = catchAsync(async (req, res, next) => {
     };
   }
 
-  if (module) {
+  if (service) {
     matchQuery = {
       ...matchQuery,
-      module: new mongoose.Types.ObjectId(module),
+      service: new mongoose.Types.ObjectId(service),
     };
   }
 
