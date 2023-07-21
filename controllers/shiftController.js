@@ -414,7 +414,7 @@ exports.getShiftsByUser = catchAsync(async (req, res, next) => {
   })
     .populate({
       path: 'module',
-      select: 'name code',
+      select: 'name code user',
     })
     .populate({
       path: 'client',
