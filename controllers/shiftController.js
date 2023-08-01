@@ -341,12 +341,47 @@ exports.createShift = catchAsync(async (req, res, next) => {
 
   const waitingShifts = todayShifts.filter((s) => s.state === 'on-hold');
 
+  const waitTimeAvg = await Shift.aggregate([
+    {
+      $match: {
+        service: service._id,
+        state: {
+          $in: ['completed', 'cancelled'],
+        },
+      },
+    },
+    {
+      $project: {
+        service: 1,
+        waitTime: {
+          $subtract: ['$startDate', '$date'],
+        },
+      },
+    },
+    {
+      $group: {
+        _id: '$service',
+        averageWaitTime: { $avg: '$waitTime' },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        user: '$_id',
+        waitingAverage: {
+          $divide: ['$averageWaitTime', 60 * 1000],
+        },
+      },
+    },
+  ]);
+
   if (clientEmail) {
     const message = SHIFT_EMAIL(
       clientName,
       shift,
       waitingShifts.length,
-      service
+      service,
+      waitTimeAvg[0].waitingAverage
     );
 
     try {
@@ -360,29 +395,7 @@ exports.createShift = catchAsync(async (req, res, next) => {
     }
   }
 
-  const waitTimeAvg = await Shift.aggregate([
-    {
-      $project: {
-        service: 1,
-        waitTime: {
-          $subtract: ['$endDate', '$startDate'],
-        },
-      },
-    },
-    {
-      $group: {
-        _id: '$service',
-        averageWaitTime: { $avg: '$waitTime' },
-      },
-    },
-    {
-      $match: {
-        _id: new mongoose.Types.ObjectId(serviceId),
-      },
-    },
-  ]);
-
-  // console.log('waitTimeAvg :>> ', waitTimeAvg);
+  console.log('waitTimeAvg :>> ', waitTimeAvg);
 
   io.emit('shiftCreated', userId);
 
@@ -392,7 +405,7 @@ exports.createShift = catchAsync(async (req, res, next) => {
       ...shift._doc,
       service,
       waiting: waitingShifts.length,
-      averageWaitTime: waitTimeAvg[0].averageWaitTime,
+      averageWaitTime: waitTimeAvg[0].waitingAverage,
     },
     // todayShifts,
   });
