@@ -14,6 +14,9 @@ const shiftRoutes = require('./routes/shiftRoutes');
 const clientRouter = require('./routes/clientRoutes');
 const globalErrorHandler = require('./controllers/errorController');
 const AppError = require('./utils/appError');
+const agenda = require('./agenda');
+const globalUtils = require('./utils/globalUtils');
+const cronUtils = require('./utils/cronUtils');
 
 // 1. MIDDLEWARES
 
@@ -61,6 +64,29 @@ app.use('/api/v1/shifts', shiftRoutes);
 app.use('/api/v1/modules', moduleRouter);
 app.use('/api/v1/clients', clientRouter);
 
+// if (process.env.ACTIVE_CRONS === "true") {
+// globalUtils.agendaDefine(
+//   agenda,
+//   'firstRun',
+//   rsrController.batchUpdateProducts
+// );
+
+globalUtils.agendaDefine(agenda, 'resetUsersAvailability', async () => {
+  cronUtils.resetUsersAvailability();
+});
+
+// }
+
+(async function () {
+  await agenda.start();
+  console.log('Agenda started with active crons');
+  // await agenda.schedule('in 1 minute', 'resetUsersAvailability');
+  await globalUtils.agendaRepeatEvery(
+    agenda,
+    'resetUsersAvailability',
+    '0 0 * * *'
+  );
+})();
 // 404 route
 
 app.all('*', (req, res, next) => {
