@@ -6,6 +6,11 @@ const { promisify } = require('util');
 const sendEmail = require('../utils/email');
 const crypto = require('crypto');
 const { PASS_RECOVERY_EMAIL } = require('../utils/emails/pass-recovery');
+let io;
+
+exports.setAuthControllerIO = (socketIO) => {
+  io = socketIO;
+};
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SK, {
@@ -66,6 +71,16 @@ exports.login = catchAsync(async (req, res, next) => {
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError('Incorrect email or password', 401));
   }
+
+  await User.findByIdAndUpdate(user._id, {
+    isAvailable: true,
+  });
+
+  user.isAvailable = true;
+
+  io.emit('changeAvailability', user.isAvailable);
+
+  // user.save();
 
   createSendToken(user, 200, res);
 });

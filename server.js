@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 dotenv.config({ path: './config.env' });
 const { setUserControllerIO } = require('./controllers/userController');
 const { setShiftControllerIO } = require('./controllers/shiftController');
+const { setAuthControllerIO } = require('./controllers/authController');
 
 process.on('uncaughtException', (err) => {
   console.log('err :>> ', err.name, err.message);
@@ -33,6 +34,7 @@ io.on('connection', (socket) => {
 
 setUserControllerIO(io);
 setShiftControllerIO(io);
+setAuthControllerIO(io);
 
 const port = process.env.PORT || 3000;
 
