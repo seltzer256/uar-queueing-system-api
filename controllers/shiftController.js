@@ -341,6 +341,8 @@ exports.createShift = catchAsync(async (req, res, next) => {
 
   const waitingShifts = todayShifts.filter((s) => s.state === 'on-hold');
 
+  // console.log("waitingShifts :>>", waitingShifts)
+
   const waitTimeAvg = await Shift.aggregate([
     {
       $match: {
@@ -375,14 +377,17 @@ exports.createShift = catchAsync(async (req, res, next) => {
     },
   ]);
 
+  // console.log("waitTimeAvg :>> ", waitTimeAvg)
+
   if (clientEmail) {
     const message = SHIFT_EMAIL(
       clientName,
       shift,
       waitingShifts.length,
       service,
-      waitTimeAvg[0].waitingAverage
+      waitTimeAvg[0]?.waitingAverage ?? 0
     );
+    // console.log("message :>> ", message)
 
     try {
       await sendEmail({
@@ -395,7 +400,7 @@ exports.createShift = catchAsync(async (req, res, next) => {
     }
   }
 
-  console.log('waitTimeAvg :>> ', waitTimeAvg);
+  // console.log('waitTimeAvg :>> ', waitTimeAvg);
 
   io.emit('shiftCreated', userId);
 
@@ -405,7 +410,7 @@ exports.createShift = catchAsync(async (req, res, next) => {
       ...shift._doc,
       service,
       waiting: waitingShifts.length,
-      averageWaitTime: waitTimeAvg[0].waitingAverage,
+      averageWaitTime: waitTimeAvg[0]?.waitingAverage,
     },
     // todayShifts,
   });

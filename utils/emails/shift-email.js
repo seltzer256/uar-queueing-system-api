@@ -1,6 +1,6 @@
 const { UAR_TEMPLATE } = require('./uar-template');
 
-exports.SHIFT_EMAIL = (name, shift, waitingShifts, service, avgTime) => {
+exports.SHIFT_EMAIL = (name, shift, waitingShifts, service, avgTime = 0) => {
   return UAR_TEMPLATE(`
     <p>Estimado(a) ${name},</p>
     <br>
