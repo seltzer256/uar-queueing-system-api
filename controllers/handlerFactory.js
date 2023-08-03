@@ -18,7 +18,7 @@ exports.deleteOne = (Model) =>
     });
   });
 
-exports.updateOne = (Model) =>
+exports.updateOne = (Model, fn) =>
   catchAsync(async (req, res, next) => {
     const modelName = `${Model.modelName.toLowerCase()}s`;
     const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
@@ -29,6 +29,8 @@ exports.updateOne = (Model) =>
     if (!doc) {
       return next(new AppError('No document found with that ID.', 404));
     }
+
+    if (fn) fn(doc);
 
     res.json({
       status: 'success',
