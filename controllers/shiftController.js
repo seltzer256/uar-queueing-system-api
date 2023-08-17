@@ -423,6 +423,12 @@ exports.getShiftsByUser = catchAsync(async (req, res, next) => {
     user: new mongoose.Types.ObjectId(user),
   });
 
+  if (!module) {
+    return res.status(401).json({
+      status: 'error',
+      message: 'Unauthorized',
+    });
+  }
   // console.log('module :>> ', module);
   const today = dayjs().utc().format('YYYY-MM-DD');
 
@@ -430,7 +436,7 @@ exports.getShiftsByUser = catchAsync(async (req, res, next) => {
     date: {
       $gte: new Date(today),
     },
-    $or: [{ module: module._id }, { service: { $in: module.services } }],
+    $or: [{ module: module?._id }, { service: { $in: module?.services } }],
   })
     .populate({
       path: 'module',
